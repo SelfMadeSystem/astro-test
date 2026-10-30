@@ -1,0 +1,60 @@
+---
+import { methods } from "./methods";
+---
+
+<div class="flex gap-2">
+  {
+    methods.map((m) => (
+      <button
+        id={"btn-" + m.toLowerCase()}
+        class="bg-gray-200 hover:bg-gray-300 cursor-pointer py-2 px-4 rounded transition"
+      >
+        {m.toUpperCase()}
+      </button>
+    ))
+  }
+</div>
+
+<div class="border-2 rounded p-2">
+  <span id="status-text">No status</span>
+</div>
+
+<script>
+  import { methods } from "./methods";
+  console.log(methods);
+
+  const statusText = document.getElementById("status-text");
+  if (!statusText) {
+    throw new Error("Status text element not found!");
+  }
+
+  for (const method of methods) {
+    const btn = document.getElementById("btn-" + method);
+    if (!btn) continue;
+    btn.addEventListener("click", async () => {
+      const result = await fetch("/test", {
+        method: method.toUpperCase(),
+      })
+        .then((r) => {
+          if (!r.ok) {
+            return { message: "Not ok!!! Status: " + r.status };
+          }
+          if (method === "options") {
+            const headers = r.headers;
+            const acam = headers.get("access-control-allow-methods");
+            return { message: "Supported methods: " + acam };
+          }
+          if (method === "head") {
+            return { message: "No content for HEAD request 👍" };
+          }
+          return r.json().catch(() => ({ message: "No JSON?" }));
+        })
+        .catch((e) => (console.log(e), { message: "Unknown network error" }));
+      if ("message" in result) {
+        statusText.innerText = result.message;
+        return;
+      }
+      statusText.innerText = "No message found!";
+    });
+  }
+</script>

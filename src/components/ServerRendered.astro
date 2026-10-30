@@ -1,0 +1,9 @@
+---
+const thingy = await new Promise((accept) => {
+  setTimeout(() => {
+    accept(Math.random());
+  }, 1000);
+});
+---
+
+<div class="bg-gray-100 border-2">Thingy: {thingy}</div>
